@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prediction Results - TruMed</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="icon" href="/static/images/dev4.png" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        .navbar {
+            background: transparent;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo img {
+            height: 40px;
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s, text-shadow 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+            text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #667eea;
+            transition: width 0.3s;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .btn-logout {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: rgb(0, 0, 0) !important;
+            padding: 0.6rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .results-container {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .results-container > h1 {
+            text-align: center;
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-result {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            color: #000000;
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .main-result h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            font-weight: 800;
+            color: #333;
+        }
+
+        .confidence-bar {
+            background: rgba(255, 255, 255, 0.5);
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 1.5rem 0;
+            position: relative;
+            border: 2px solid black;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 15px;
+            transition: width 1s ease-out;
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.6);
+            animation: fillBar 1.5s ease-out;
+        }
+
+        @keyframes fillBar {
+            from {
+                width: 0 !important;
+            }
+        }
+
+        .confidence-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin: 1rem 0;
+            color: #333;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 0.7rem 1.8rem;
+            border-radius: 25px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .risk-low {
+            background: #10b981;
+            color: white;
+        }
+
+        .risk-medium, .risk-moderate {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .risk-high {
+            background: #ef4444;
+            color: white;
+        }
+
+        .result-card h3 {
+            color: #667eea;
+            font-size: 1.6rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-desc {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-size: 1.05rem;
+        }
+
+        .factors-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .factor-item {
+            display: grid;
+            grid-template-columns: 150px 1fr 80px;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.8rem;
+            background: #f8f9ff;
+            border-radius: 10px;
+            transition: background 0.3s;
+        }
+
+        .factor-item:hover {
+            background: #eef1ff;
+        }
+
+        .factor-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .factor-bar {
+            background: #e0e7ff;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .factor-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 6px;
+            transition: width 1s ease-out;
+            animation: fillFactor 1.2s ease-out;
+        }
+
+        @keyframes fillFactor {
+            from {
+                width: 0 !important;
+            }
+        }
+
+        .factor-score {
+            font-weight: 700;
+            color: #667eea;
+            text-align: right;
+        }
+
+        /* MEDICINE RECOMMENDATION STYLES */
+        .medicine-section {
+            margin-top: 2rem;
+        }
+
+        .disclaimer-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 1.2rem;
+            margin-bottom: 1.5rem;
+            border-radius: 8px;
+            font-weight: 500;
+            color: #856404;
+        }
+
+        .disclaimer-box strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            color: #856404;
+        }
+
+        .recommendation-card {
+            background: #f8f9ff;
+            padding: 1.5rem;
+            margin-bottom: 1.2rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .recommendation-card:hover {
+            background: #eef1ff;
+            transform: translateX(5px);
+        }
+
+        .recommendation-card h4 {
+            color: #667eea;
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .recommendation-card p {
+            color: #333;
+            line-height: 1.7;
+            font-size: 1.05rem;
+        }
+
+        .consult-box {
+            background: #d1ecf1;
+            border-left: 5px solid #17a2b8;
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+        }
+
+        .consult-box h4 {
+            color: #0c5460;
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .consult-box p {
+            color: #0c5460;
+            line-height: 1.8;
+            font-size: 1rem;
+        }
+
+        .suggestions-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .suggestions-list li {
+            padding: 1rem 1rem 1rem 3rem;
+            background: linear-gradient(90deg, #f0f4ff 0%, #ffffff 100%);
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .suggestions-list li:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .suggestions-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 1rem;
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .disclaimer {
+            margin-top: 2rem;
+            padding: 1.2rem;
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+            color: #92400e;
+            font-weight: 500;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 1rem 2.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.3s;
+            text-align: center;
+            min-width: 180px;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(79, 172, 254, 0.6);
+            background: linear-gradient(135deg, #3b9be6 0%, #00d9e6 100%);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.95);
+            color: #4facfe;
+            border: 2px solid #4facfe;
+        }
+
+        .btn-secondary:hover {
+            background: #4facfe;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+        }
+
+        /* AI Chatbot Styles */
+        .chat-button {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 65px;
+            height: 65px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+            transition: all 0.3s ease;
+            z-index: 999;
+            animation: pulse-chat 2s infinite;
+            border: 3px solid white;
+        }
+
+        @keyframes pulse-chat {
+            0%, 100% {
+                box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 5px 35px rgba(102, 126, 234, 0.7);
+                transform: scale(1.05);
+            }
+        }
+
+        .chat-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.7);
+        }
+
+        .chat-button-icon {
+            font-size: 32px;
+            color: white;
+        }
+
+        .chat-window {
+            position: fixed;
+            bottom: 110px;
+            right: 30px;
+            width: 400px;
+            height: 600px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.3);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            animation: slideUp 0.4s ease;
+            overflow: hidden;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-window.active {
+            display: flex;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-avatar {
+            width: 45px;
+            height: 45px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header-text h3 {
+            font-size: 17px;
+            margin-bottom: 3px;
+            font-weight: 600;
+        }
+
+        .chat-header-text p {
+            font-size: 12px;
+            opacity: 0.95;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            background: #4caf50;
+            border-radius: 50%;
+            display: inline-block;
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .chat-close {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 50%;
+            transition: all 0.3s;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .chat-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 3px;
+        }
+
+        .chat-message {
+            animation: fadeInMessage 0.3s ease;
+        }
+
+        @keyframes fadeInMessage {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-bot {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .message-user {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-content {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.6;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+
+        .message-bot .message-content {
+            background: white;
+            color: #333;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .message-user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .message-typing {
+            display: flex;
+            gap: 5px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            max-width: 70px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #667eea;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+
+        .chat-input-container {
+            padding: 15px 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+        }
+
+        .chat-send-btn {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .chat-send-btn:hover:not(:disabled) {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .quick-reply-btn {
+            padding: 8px 14px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            color: #667eea;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .quick-reply-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 3px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .rate-limit-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+
+            .results-container > h1 {
+                font-size: 2rem;
+            }
+
+            .main-result h2 {
+                font-size: 1.8rem;
+            }
+
+            .factor-item {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .factor-score {
+                text-align: left;
+            }
+
+            .result-actions {
+                flex-direction: column;
+            }
+
+            .btn-primary, .btn-secondary {
+                width: 100%;
+            }
+
+            .chat-window {
+                width: calc(100% - 20px);
+                right: 10px;
+                left: 10px;
+                bottom: 100px;
+                height: 500px;
+            }
+
+            .chat-button {
+                right: 20px;
+                bottom: 20px;
+                width: 60px;
+                height: 60px;
+            }
+
+            .chat-button-icon {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .chat-window {
+                width: 100%;
+                right: 0;
+                left: 0;
+                bottom: 90px;
+                height: calc(100vh - 110px);
+                border-radius: 20px 20px 0 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <img src="/static/images/dev2.png" alt="TruMed Logo">
+            </div>
+            <div class="nav-links">
+                <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                <a href="{{ url_for('prediction') }}">New Prediction</a>
+                <a href="{{ url_for('history') }}">History</a>
+                <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="results-container">
+            <h1>🎯 Prediction Results</h1>
+            
+            <div class="result-card main-result">
+                <h2>{{ result.disease }}</h2>
+                <div class="confidence-bar">
+                    <div class="confidence-fill" style="width: {{ "%.2f"|format(result.confidence) }}%"></div>
+                </div>
+                <p class="confidence-text">XAI Confidence: {{ "%.2f"|format(result.confidence) }}%</p>
+                <span class="risk-badge risk-{{ result.risk_level.lower() }}">{{ result.risk_level }} Risk</span>
+            </div>
+
+            <div class="result-card">
+                <h3>💡 Explainable AI - Contributing Factors</h3>
+                <p class="section-desc">These symptoms most influenced this prediction:</p>
+                <div class="factors-list">
+                    {% for factor in result.contributing_factors %}
+                        <div class="factor-item">
+                            <span class="factor-name">{{ factor.symptom }}</span>
+                            <div class="factor-bar">
+                                <div class="factor-fill" style="width: {{ "%.2f"|format(factor.importance) }}%"></div>
+                            </div>
+                            <span class="factor-score">{{ "%.2f"|format(factor.importance) }}%</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- MEDICINE RECOMMENDATIONS SECTION -->
+            <div class="result-card medicine-section">
+                <h3>💊 Treatment Recommendations</h3>
+                
+                <div class="disclaimer-box">
+                    <strong>⚠️ IMPORTANT MEDICAL DISCLAIMER</strong>
+                    <p>These recommendations are for informational purposes only. This is NOT a substitute for professional medical advice, diagnosis, or treatment. Always consult a qualified healthcare provider before taking any medication.</p>
+                </div>
+                
+                <div class="recommendation-card">
+                    <h4>🩺 Recommended Medicines</h4>
+                    <p>{{ result.medicines }}</p>
+                </div>
+                
+                <div class="recommendation-card">
+                    <h4>⚕️ Precautions</h4>
+                    <p>{{ result.precautions }}</p>
+                </div>
+                
+                <div class="recommendation-card">
+                    <h4>🥗 Diet Recommendations</h4>
+                    <p>{{ result.diet }}</p>
+                </div>
+                
+                <div class="consult-box">
+                    <h4>👨‍⚕️ Next Steps</h4>
+                    <p>
+                        ✓ Consult a doctor for proper diagnosis<br>
+                        ✓ Get a prescription before taking any medication<br>
+                        ✓ Inform your doctor about allergies and current medications<br>
+                        ✓ Follow up regularly for monitoring
+                    </p>
+                </div>
+            </div>
+
+            <div class="result-card">
+                <h3>💡 AI Recommendations</h3>
+                <ul class="suggestions-list">
+                    {% for suggestion in result.suggestions %}
+                        <li>{{ suggestion }}</li>
+                    {% endfor %}
+                </ul>
+                <p class="disclaimer">⚠️ This is an AI prediction for educational purposes. Always consult a qualified healthcare professional for medical advice.</p>
+            </div>
+
+            <div class="result-actions">
+                <a href="{{ url_for('prediction') }}" class="btn-primary">New Assessment</a>
+                <a href="{{ url_for('history') }}" class="btn-primary">View History</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Button -->
+    <div class="chat-button" id="chatButton" title="Chat with AI Health Assistant">
+        <div class="chat-button-icon">🤖</div>
+    </div>
+
+    <!-- AI Chatbot Window -->
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <div class="chat-avatar">🤖</div>
+                <div class="chat-header-text">
+                    <h3>TruMed Assistant</h3>
+                    <p><span class="online-indicator"></span> Online • Ready to help</p>
+                </div>
+            </div>
+            <button class="chat-close" id="chatClose" title="Close chat">×</button>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-message message-bot">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    Hi! 👋 I'm your AI Health Assistant. I can help you understand your prediction results better. Feel free to ask me anything!
+                    <div class="quick-replies">
+                        <button class="quick-reply-btn" onclick="sendQuickReply('Explain my results in detail')">📊 Explain Results</button>
+                        <button class="quick-reply-btn" onclick="sendQuickReply('What should I do next?')">🏥 Next Steps</button>
+                        <button class="quick-reply-btn" onclick="sendQuickReply('Tell me about the medicines')">💊 Medicine Info</button>
+                        <button class="quick-reply-btn" onclick="sendQuickReply('How accurate is this prediction?')">🎯 Accuracy</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <input 
+                    type="text" 
+                    class="chat-input" 
+                    id="chatInput" 
+                    placeholder="Ask about your results..."
+                    maxlength="500"
+                    onkeypress="handleChatKeyPress(event)"
+                >
+                <button class="chat-send-btn" id="chatSendBtn" onclick="sendMessage()" title="Send message">
+                    ➤
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Conversation history for context
+        let conversationHistory = [];
+
+        // Get prediction context from page
+        const predictionContext = {
+            disease: '{{ result.disease }}',
+            confidence: {{ result.confidence }},
+            riskLevel: '{{ result.risk_level }}'
+        };
+
+        // ==========================================
+        // AI CHATBOT IMPLEMENTATION
+        // ==========================================
+
+        const chatButton = document.getElementById('chatButton');
+        const chatWindow = document.getElementById('chatWindow');
+        const chatClose = document.getElementById('chatClose');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendBtn = document.getElementById('chatSendBtn');
+
+        // Toggle chat window
+        chatButton.addEventListener('click', () => {
+            chatWindow.classList.toggle('active');
+            if (chatWindow.classList.contains('active')) {
+                chatInput.focus();
+                if (!chatWindow.dataset.opened) {
+                    chatWindow.dataset.opened = 'true';
+                }
+            }
+        });
+
+        // Close chat window
+        chatClose.addEventListener('click', () => {
+            chatWindow.classList.remove('active');
+        });
+
+        // Handle Enter key press
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        // Send message to chatbot
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            
+            if (!message) {
+                return;
+            }
+
+            // Validate message length
+            if (message.length > 500) {
+                showRateLimitMessage('Message is too long. Please keep it under 500 characters.');
+                return;
+            }
+
+            // Add context about current prediction to message
+            let contextualMessage = message;
+            if (message.toLowerCase().includes('result') || 
+                message.toLowerCase().includes('prediction') || 
+                message.toLowerCase().includes('diagnosis')) {
+                contextualMessage = `Current Prediction: ${predictionContext.disease} (${predictionContext.confidence.toFixed(1)}% confidence, ${predictionContext.riskLevel} risk). User asks: ${message}`;
+            }
+
+            // Add user message to chat
+            addMessageToChat('user', message);
+            
+            // Store in conversation history
+            conversationHistory.push({ user: message });
+            
+            // Clear input and disable button
+            chatInput.value = '';
+            chatSendBtn.disabled = true;
+            chatInput.disabled = true;
+
+            // Show typing indicator
+            showTypingIndicator();
+
+            try {
+                // Call the chatbot API
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: contextualMessage,
+                        conversation_history: conversationHistory.slice(-6) // Last 3 exchanges
+                    })
+                });
+
+                // Remove typing indicator
+                removeTypingIndicator();
+
+                if (response.status === 429) {
+                    // Rate limit exceeded
+                    const data = await response.json();
+                    showRateLimitMessage(data.error || 'Too many requests. Please wait a moment.');
+                    addMessageToChat('bot', '⚠️ You\'re sending messages too quickly. Please wait a moment before trying again.');
+                } else if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        addMessageToChat('bot', data.response);
+                        
+                        // Store bot response in history
+                        conversationHistory[conversationHistory.length - 1].bot = data.response;
+                        
+                        // Log data source
+                        if (data.source === 'fallback') {
+                            console.log('Response generated by fallback system');
+                        }
+                    } else {
+                        addMessageToChat('bot', '❌ ' + (data.error || 'Sorry, I encountered an error. Please try again.'));
+                    }
+                } else {
+                    addMessageToChat('bot', '❌ Sorry, I\'m having trouble connecting. Please try again in a moment.');
+                }
+            } catch (error) {
+                console.error('Chat error:', error);
+                removeTypingIndicator();
+                addMessageToChat('bot', '❌ Network error. Please check your connection and try again.');
+            } finally {
+                // Re-enable input and button
+                chatSendBtn.disabled = false;
+                chatInput.disabled = false;
+                chatInput.focus();
+            }
+        }
+
+        // Send quick reply
+        function sendQuickReply(message) {
+            chatInput.value = message;
+            sendMessage();
+        }
+
+        // Add message to chat UI
+        function addMessageToChat(type, content) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message message-${type}`;
+
+            // Format content
+            const formattedContent = formatMessageContent(content);
+
+            if (type === 'bot') {
+                messageDiv.innerHTML = `
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">${formattedContent}</div>
+                `;
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="message-content">${escapeHtml(content)}</div>
+                `;
+            }
+
+            chatMessages.appendChild(messageDiv);
+            
+            // Smooth scroll to bottom
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        // Format message content (convert markdown-like formatting)
+        function formatMessageContent(content) {
+            if (typeof content !== 'string') return content;
+            
+            // Escape HTML first
+            let formatted = escapeHtml(content);
+            
+            // Convert **bold** to <strong>
+            formatted = formatted.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            // Convert line breaks
+            formatted = formatted.replace(/\n/g, '<br>');
+            
+            // Convert bullet points
+            formatted = formatted.replace(/^[•\-]\s/gm, '&nbsp;&nbsp;• ');
+            
+            return formatted;
+        }
+
+        // Escape HTML to prevent XSS
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Show typing indicator
+        function showTypingIndicator() {
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'chat-message message-bot';
+            typingDiv.id = 'typingIndicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-typing">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+            chatMessages.appendChild(typingDiv);
+            chatMessages.scrollTo({
+                top: chatMessages.scrollHeight,
+                behavior: 'smooth'
+            });
+        }
+
+        // Remove typing indicator
+        function removeTypingIndicator() {
+            const typingIndicator = document.getElementById('typingIndicator');
+            if (typingIndicator) {
+                typingIndicator.remove();
+            }
+        }
+
+        // Show rate limit message
+        function showRateLimitMessage(message) {
+            const existingMsg = document.querySelector('.rate-limit-message');
+            if (existingMsg) {
+                existingMsg.remove();
+            }
+
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'rate-limit-message';
+            msgDiv.textContent = message;
+            
+            const inputContainer = document.querySelector('.chat-input-container');
+            inputContainer.insertBefore(msgDiv, inputContainer.firstChild);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                msgDiv.remove();
+            }, 5000);
+        }
+
+        // ==========================================
+        // INITIALIZATION
+        // ==========================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Focus on chat input when window opens
+            const observer = new MutationObserver((mutations) => {
+                mutations.forEach((mutation) => {
+                    if (mutation.attributeName === 'class') {
+                        if (chatWindow.classList.contains('active')) {
+                            setTimeout(() => chatInput.focus(), 100);
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(chatWindow, { attributes: true });
+
+            // Add a welcome message with prediction context
+            setTimeout(() => {
+                const contextMsg = document.createElement('div');
+                contextMsg.className = 'chat-message message-bot';
+                contextMsg.innerHTML = `
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        I can see you've been diagnosed with <strong>${predictionContext.disease}</strong> with ${predictionContext.confidence.toFixed(1)}% confidence. 
+                        I'm here to answer any questions about your results! 💙
+                    </div>
+                `;
+                // Don't add automatically, keep initial message only
+            }, 1000);
+        });
+
+        // Clear conversation history when chat is closed for more than 5 minutes
+        let chatCloseTimeout;
+        chatClose.addEventListener('click', () => {
+            chatCloseTimeout = setTimeout(() => {
+                conversationHistory = [];
+                console.log('Conversation history cleared due to inactivity');
+            }, 300000); // 5 minutes
+        });
+
+        chatButton.addEventListener('click', () => {
+            clearTimeout(chatCloseTimeout);
+        });
+
+        // Add context-aware quick replies based on risk level
+        document.addEventListener('DOMContentLoaded', () => {
+            const riskLevel = '{{ result.risk_level }}'.toLowerCase();
+            
+            // You can customize messages based on risk level
+            if (riskLevel === 'high') {
+                console.log('High risk prediction detected - user should consult doctor urgently');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+    'model': Trained RandomForestClassifier,
+    'symptoms_list': 24 symptoms,
+    'diseases': 10 disease classes,
+    'training_samples': 2000,
+    'training_accuracy': 93.35%,
+    'version': '1.0',
+    'created_date': '2025-10-09'
+}
