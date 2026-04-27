@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login - TruMed</title>
+
+<link rel="icon" href="/static/images/dev4.png" type="image/x-icon">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Montserrat',sans-serif;
+    background:#ececec;
+    min-height:100vh;
+    color:#111;
+}
+
+/* main layout */
+.wrapper{
+    width:100%;
+    min-height:100vh;
+    display:grid;
+    grid-template-columns: 46% 54%;
+}
+
+/* LEFT LOGIN */
+.left{
+    background:#f8f8f8;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:40px;
+}
+
+.login-box{
+    width:100%;
+    max-width:360px;
+}
+
+.back-home{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:28px;
+    text-decoration:none;
+    color:#555;
+    font-size:14px;
+    font-weight:600;
+}
+
+.back-home:hover{
+    color:#ef4444;
+}
+
+h1{
+    font-size:42px;
+    font-weight:800;
+    letter-spacing:1px;
+    margin-bottom:10px;
+}
+
+.subtitle{
+    color:#777;
+    font-size:15px;
+    margin-bottom:34px;
+}
+
+/* alerts */
+.alert{
+    padding:14px;
+    border-radius:10px;
+    margin-bottom:16px;
+    font-size:14px;
+    font-weight:600;
+}
+
+.alert-danger{
+    background:#fee2e2;
+    color:#b91c1c;
+}
+
+.alert-success{
+    background:#dcfce7;
+    color:#166534;
+}
+
+.group{
+    margin-bottom:18px;
+}
+
+label{
+    display:block;
+    margin-bottom:8px;
+    font-size:14px;
+    font-weight:700;
+}
+
+.input-wrap{
+    position:relative;
+}
+
+input{
+    width:100%;
+    height:50px;
+    border:1px solid #d6d6d6;
+    border-radius:10px;
+    padding:0 16px;
+    font-size:14px;
+    background:white;
+    outline:none;
+    transition:.2s;
+}
+
+input:focus{
+    border-color:#ef4444;
+    box-shadow:0 0 0 4px rgba(239,68,68,.08);
+}
+
+.password-icon{
+    position:absolute;
+    right:14px;
+    top:50%;
+    transform:translateY(-50%);
+    cursor:pointer;
+    color:#999;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:12px 0 22px;
+}
+
+.remember{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    font-size:13px;
+    color:#555;
+}
+
+.remember input{
+    width:auto;
+    height:auto;
+}
+
+.row a{
+    text-decoration:none;
+    font-size:13px;
+    color:#555;
+}
+
+.row a:hover{
+    color:#ef4444;
+}
+
+.btn{
+    width:100%;
+    height:52px;
+    border:none;
+    border-radius:10px;
+    background:#ef4444;
+    color:white;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.btn:hover{
+    background:#dc2626;
+}
+
+.google-btn{
+    width:100%;
+    height:52px;
+    margin-top:14px;
+    border:1px solid #d6d6d6;
+    border-radius:10px;
+    background:white;
+    text-decoration:none;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    color:#111;
+    font-weight:600;
+    font-size:14px;
+}
+
+.google-btn:hover{
+    border-color:#ef4444;
+}
+
+.footer{
+    text-align:center;
+    margin-top:18px;
+    font-size:13px;
+    color:#666;
+}
+
+.footer a{
+    color:#ef4444;
+    text-decoration:none;
+    font-weight:700;
+}
+
+.footer a:hover{
+    text-decoration:underline;
+}
+
+/* RIGHT VISUAL */
+.right{
+   background:#e9e9e9;
+    position:relative;
+    overflow:hidden;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.right::before{
+    content:"";
+    position:absolute;
+    width:700px;
+    height:700px;
+    border-radius:50%;
+    border:40px solid rgba(255,255,255,.45);
+}
+
+.right::after{
+    content:"";
+    position:absolute;
+    width:520px;
+    height:520px;
+    border-radius:50%;
+    border:30px solid rgba(255,255,255,.35);
+}
+
+/* Replace image below with your own medical illustration */
+.hero-img{
+    width:100%;
+    height:100vh;
+    object-fit:cover;
+    object-position:center;
+    z-index:2;
+}
+
+/* mobile */
+@media(max-width:980px){
+    .wrapper{
+        grid-template-columns:1fr;
+    }
+
+    .right{
+        display:none;
+    }
+
+    .left{
+        padding:28px;
+    }
+
+    h1{
+        font-size:34px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+    <!-- LEFT -->
+    <div class="left">
+        <div class="login-box">
+
+            <a href="{{ url_for('landing') }}" class="back-home">
+                <i class="fa-solid fa-arrow-left"></i> Back to Home
+            </a>
+
+            <h1>WELCOME BACK</h1>
+            <p class="subtitle">Welcome back! Please enter your details.</p>
+
+            <!-- Flash messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <form method="POST">
+
+                <div class="group">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="Enter your email" required>
+                </div>
+
+                <div class="group">
+                    <label>Password</label>
+                    <div class="input-wrap">
+                        <input type="password" id="password" name="password" placeholder="********" required>
+                        <i class="fa-solid fa-eye password-icon" onclick="togglePassword()"></i>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label class="remember">
+                        <input type="checkbox">
+                        Remember me
+                    </label>
+
+                    <a href="{{ url_for('forgot_password') }}">Forgot password</a>
+                </div>
+
+                <button class="btn" type="submit">Sign in</button>
+
+            </form>
+
+            <a href="{{ url_for('google_login') }}" class="google-btn">
+                <i class="fa-brands fa-google"></i>
+                Sign in with Google
+            </a>
+
+            <div class="footer">
+                Don't have an account?
+                <a href="{{ url_for('signup') }}">Sign up for free!</a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+
+        <!-- Put your own image path here -->
+       <img src="{{ url_for('static', filename='images/login-side.png') }}" class="hero-img" alt="Login Visual">
+
+    </div>
+
+</div>
+
+<script>
+function togglePassword(){
+    const pass = document.getElementById("password");
+    pass.type = pass.type === "password" ? "text" : "password";
+}
+</script>
+
+</body>
+</html>
