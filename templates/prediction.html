@@ -1,1024 +1,726 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/static/images/dev4.png" type="image/x-icon">
-    <title>Disease Prediction - TruMed</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f7fa;
-            min-height: 100vh;
-        }
-
-        /* Navbar Styles - Matching Landing.html */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            padding: 1rem 0;
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            animation: slideDown 0.5s ease;
-        }
-
-        @keyframes slideDown {
-            from {
-                transform: translateY(-100%);
-            }
-            to {
-                transform: translateY(0);
-            }
-        }
-
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            transition: transform 0.3s ease;
-        }
-
-        .logo:hover {
-            transform: scale(1.05);
-        }
-
-        .logo img {
-            height: 50px;
-            width: auto;
-            object-fit: contain;
-            filter: drop-shadow(0 2px 8px rgba(102, 126, 234, 0.2));
-            transition: filter 0.3s ease;
-        }
-
-        .logo:hover img {
-            filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.4));
-        }
-
-        .logo span {
-            font-size: 1.8rem;
-            font-weight: bold;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            padding: 0.7rem 1.5rem;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s;
-            color: #667eea;
-            border: 2px solid transparent;
-        }
-
-        .nav-links a:hover,
-        .nav-links a.active {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-logout {
-            color: #667eea;
-            border: 2px solid #667eea;
-        }
-
-        .btn-logout:hover {
-            background: #667eea;
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 2rem;
-        }
-
-        .prediction-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .prediction-header h1 {
-            font-size: 2.5rem;
-            color: #333;
-            margin-bottom: 0.5rem;
-        }
-
-        .prediction-header p {
-            color: #666;
-            font-size: 1.1rem;
-        }
-
-        .prediction-form {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-        }
-
-        /* Selection Counter */
-        .selection-counter {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 1rem;
-        }
-
-        .counter-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .counter-number {
-            font-size: 2.5rem;
-            font-weight: bold;
-        }
-
-        .counter-text {
-            font-size: 1rem;
-        }
-
-        .counter-warning {
-            background: rgba(255,255,255,0.2);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-        }
-
-        /* Search and Filter Section */
-        .filter-section {
-            margin-bottom: 2rem;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 1rem;
-            font-size: 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .search-box:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .category-filters {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-
-        .filter-btn {
-            padding: 0.6rem 1.2rem;
-            border: 2px solid #667eea;
-            background: white;
-            color: #667eea;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 0.9rem;
-            font-weight: 600;
-        }
-
-        .filter-btn:hover {
-            background: #f8f9ff;
-        }
-
-        .filter-btn.active {
-            background: #667eea;
-            color: white;
-        }
-
-        .filter-btn.all {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-        }
-
-        /* Category Accordion */
-        .category-accordion {
-            margin-bottom: 2rem;
-        }
-
-        .category-section {
-            margin-bottom: 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: all 0.3s;
-        }
-
-        .category-section.expanded {
-            border-color: #667eea;
-        }
-
-        .category-header {
-            background: #f8f9fa;
-            padding: 1.2rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: all 0.3s;
-        }
-
-        .category-header:hover {
-            background: #e9ecef;
-        }
-
-        .category-section.expanded .category-header {
-            background: #667eea;
-            color: white;
-        }
-
-        .category-title {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-
-        .category-icon {
-            font-size: 1.5rem;
-        }
-
-        .category-info {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .category-count {
-            background: white;
-            color: #667eea;
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-
-        .category-section.expanded .category-count {
-            background: rgba(255,255,255,0.9);
-        }
-
-        .category-selected {
-            background: #4CAF50;
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 15px;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
-
-        .toggle-icon {
-            font-size: 1.2rem;
-            transition: transform 0.3s;
-        }
-
-        .category-section.expanded .toggle-icon {
-            transform: rotate(180deg);
-        }
-
-        .category-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-
-        .category-section.expanded .category-content {
-            max-height: 2000px;
-        }
-
-        .symptoms-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 0.8rem;
-            padding: 1.5rem;
-            background: #f8f9fa;
-        }
-
-        .symptom-checkbox {
-            display: flex;
-            align-items: center;
-            padding: 1rem;
-            background: white;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .symptom-checkbox:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-            transform: translateX(5px);
-        }
-
-        .symptom-checkbox.selected {
-            border-color: #4CAF50;
-            background: #e8f5e9;
-        }
-
-        .symptom-checkbox input {
-            margin-right: 0.8rem;
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            accent-color: #667eea;
-        }
-
-        .symptom-checkbox span {
-            font-size: 0.95rem;
-            color: #333;
-        }
-
-        .symptom-checkbox.selected span {
-            font-weight: 600;
-            color: #2e7d32;
-        }
-
-        /* Selected Symptoms Summary */
-        .selected-summary {
-            background: #e8f5e9;
-            border: 2px solid #4CAF50;
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            display: none;
-        }
-
-        .selected-summary.active {
-            display: block;
-        }
-
-        .selected-summary h3 {
-            color: #2e7d32;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .selected-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-        .symptom-tag {
-            background: white;
-            color: #2e7d32;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid #4CAF50;
-        }
-
-        .remove-tag {
-            cursor: pointer;
-            font-weight: bold;
-            color: #c62828;
-        }
-
-        .custom-issue-section {
-            margin-top: 2rem;
-        }
-
-        .custom-issue-section h2 {
-            margin-bottom: 1rem;
-            color: #333;
-        }
-
-        .custom-issue-section textarea {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-family: inherit;
-            font-size: 1rem;
-            resize: vertical;
-            transition: border-color 0.3s;
-        }
-
-        .custom-issue-section textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .btn-submit, .btn-reset {
-            flex: 1;
-            padding: 1.2rem;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .btn-submit {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .btn-submit:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-submit:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-
-        .btn-reset {
-            background: #f44336;
-            color: white;
-        }
-
-        .btn-reset:hover {
-            background: #d32f2f;
-        }
-
-        .error-message {
-            background: #ffebee;
-            color: #c62828;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            display: none;
-        }
-
-        .error-message.active {
-            display: block;
-        }
-
-        /* Loading State */
-        .loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.7);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-        }
-
-        .loading-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 15px;
-            text-align: center;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .nav-links {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-
-            .prediction-header h1 {
-                font-size: 2rem;
-            }
-
-            .symptoms-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-actions {
-                flex-direction: column;
-            }
-
-            .selection-counter {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .category-filters {
-                justify-content: center;
-            }
-        }
-
-        @media (max-width: 600px) {
-            .logo span {
-                font-size: 1.4rem;
-            }
-
-            .logo img {
-                height: 40px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .logo img {
-                height: 35px;
-            }
-
-            .logo span {
-                font-size: 1.3rem;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TruMed - Premium Prediction</title>
+<link rel="icon" href="{{ url_for('static', filename='images/dev2.png') }}">
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,Helvetica,sans-serif;
+}
+
+:root{
+--primary:#ef4444;
+--dark:#dc2626;
+--soft:#fff5f5;
+--border:#f3d6d6;
+--text:#111827;
+--muted:#6b7280;
+}
+
+body{
+background:linear-gradient(135deg,#fff5f5,#ffffff,#ffe4e6);
+color:var(--text);
+min-height:100vh;
+}
+
+/* NAVBAR */
+.navbar{
+position:sticky;
+top:0;
+z-index:1000;
+background:rgba(255,255,255,.92);
+backdrop-filter:blur(12px);
+border-bottom:1px solid #f3f4f6;
+box-shadow:0 8px 24px rgba(0,0,0,.05);
+}
+
+.nav-container{
+max-width:1400px;
+margin:auto;
+padding:16px 24px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:20px;
+}
+
+.logo img{
+height:52px;
+}
+
+.nav-links{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+}
+
+.nav-links a{
+text-decoration:none;
+padding:10px 18px;
+border-radius:28px;
+font-weight:700;
+color:var(--primary);
+transition:.25s;
+}
+
+.nav-links a:hover,
+.nav-links a.active{
+background:var(--primary);
+color:#fff;
+}
+
+.btn-logout{
+border:2px solid var(--primary);
+}
+
+/* HEADER */
+.container{
+max-width:1400px;
+margin:auto;
+padding:28px 24px;
+}
+
+.prediction-header{
+text-align:center;
+margin-bottom:26px;
+}
+
+.prediction-header h1{
+font-size:46px;
+margin-bottom:8px;
+}
+
+.prediction-header p{
+font-size:18px;
+color:var(--muted);
+}
+
+/* GRID */
+.prediction-form{
+display:grid;
+grid-template-columns:1.45fr .72fr;
+gap:28px;
+align-items:start;
+}
+
+/* LEFT PANEL */
+.left-panel{
+background:rgba(255,255,255,.92);
+border:1px solid rgba(255,255,255,.8);
+border-radius:24px;
+padding:24px;
+box-shadow:0 20px 45px rgba(0,0,0,.06);
+backdrop-filter:blur(10px);
+}
+
+/* RIGHT PANEL */
+.right-panel{
+position:sticky;
+top:100px;
+background:rgba(255,255,255,.95);
+border-radius:24px;
+padding:24px;
+box-shadow:0 20px 45px rgba(0,0,0,.08);
+border:1px solid rgba(255,255,255,.8);
+}
+
+/* LIVE CARD */
+.live-box{
+background:linear-gradient(135deg,#ef4444,#dc2626);
+color:#fff;
+border-radius:22px;
+padding:22px;
+margin-bottom:18px;
+}
+
+.big-count{
+font-size:56px;
+font-weight:900;
+line-height:1;
+margin-bottom:8px;
+}
+
+.mini{
+font-size:14px;
+opacity:.95;
+}
+
+.ready-meter{
+height:10px;
+margin-top:14px;
+background:rgba(255,255,255,.22);
+border-radius:20px;
+overflow:hidden;
+}
+
+.ready-fill{
+height:100%;
+width:0%;
+background:#fff;
+transition:.3s;
+}
+
+/* SEARCH */
+.filter-section{
+margin-bottom:22px;
+}
+
+.search-box{
+width:100%;
+padding:16px;
+border:2px solid #f2d8d8;
+border-radius:16px;
+font-size:16px;
+outline:none;
+}
+
+.search-box:focus{
+border-color:var(--primary);
+box-shadow:0 0 0 4px rgba(239,68,68,.08);
+}
+
+.category-filters{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+margin-top:14px;
+}
+
+.filter-btn{
+padding:10px 16px;
+border-radius:26px;
+border:1px solid #f0cccc;
+background:#fff;
+color:var(--primary);
+font-weight:700;
+cursor:pointer;
+}
+
+.filter-btn:hover,
+.filter-btn.active{
+background:var(--primary);
+color:#fff;
+}
+
+.filter-btn.all{
+background:var(--primary);
+color:#fff;
+border:none;
+}
+
+/* ACCORDION */
+.category-section{
+margin-bottom:14px;
+border-radius:18px;
+overflow:hidden;
+box-shadow:0 10px 22px rgba(0,0,0,.04);
+}
+
+.category-header{
+padding:18px;
+background:#fff;
+display:flex;
+justify-content:space-between;
+align-items:center;
+cursor:pointer;
+}
+
+.category-section.expanded .category-header{
+background:linear-gradient(135deg,#ef4444,#dc2626);
+color:#fff;
+}
+
+.category-title{
+display:flex;
+gap:12px;
+align-items:center;
+font-weight:800;
+}
+
+.category-info{
+display:flex;
+gap:8px;
+align-items:center;
+}
+
+.category-count,
+.category-selected{
+padding:6px 10px;
+border-radius:20px;
+font-size:12px;
+font-weight:800;
+}
+
+.category-count{
+background:#fff5f5;
+color:var(--primary);
+}
+
+.category-selected{
+background:#16a34a;
+color:#fff;
+}
+
+.toggle-icon{
+font-size:14px;
+}
+
+.category-content{
+display:none;
+}
+
+.category-section.expanded .category-content{
+display:block;
+}
+
+.symptoms-grid{
+padding:16px;
+display:grid;
+grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+gap:12px;
+background:#fffaf9;
+}
+
+.symptom-checkbox{
+display:flex;
+gap:10px;
+align-items:center;
+padding:14px;
+border:1px solid #f1dada;
+border-radius:14px;
+background:#fff;
+cursor:pointer;
+transition:.2s;
+}
+
+.symptom-checkbox:hover{
+transform:translateY(-2px);
+border-color:var(--primary);
+background:#fff5f5;
+}
+
+.symptom-checkbox.selected{
+background:#ecfdf3;
+border-color:#16a34a;
+}
+
+.symptom-checkbox input{
+accent-color:var(--primary);
+}
+
+/* SUMMARY */
+.selected-summary{
+display:block;
+background:#fff;
+border:1px solid #f2e2e2;
+border-radius:18px;
+padding:18px;
+margin-bottom:18px;
+}
+
+.selected-summary h3{
+margin-bottom:12px;
+}
+
+.selected-tags{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+}
+
+.symptom-tag{
+padding:8px 12px;
+border-radius:20px;
+background:#fff5f5;
+border:1px solid #ffd4d4;
+font-size:13px;
+display:flex;
+gap:8px;
+align-items:center;
+}
+
+.remove-tag{
+cursor:pointer;
+font-weight:900;
+color:var(--dark);
+}
+
+/* TEXTAREA */
+.custom-issue-section h2{
+font-size:18px;
+margin-bottom:10px;
+margin-top:8px;
+}
+
+.custom-issue-section textarea{
+width:100%;
+min-height:120px;
+padding:16px;
+border:2px solid #f2d8d8;
+border-radius:16px;
+resize:vertical;
+outline:none;
+}
+
+.custom-issue-section textarea:focus{
+border-color:var(--primary);
+}
+
+/* ACTIONS */
+.form-actions{
+display:flex;
+flex-direction:column;
+gap:14px;
+margin-top:20px;
+}
+
+.btn-submit,
+.btn-reset{
+padding:16px;
+border:none;
+border-radius:16px;
+font-weight:800;
+font-size:16px;
+cursor:pointer;
+}
+
+.btn-submit{
+background:linear-gradient(135deg,#ef4444,#dc2626);
+color:#fff;
+}
+
+.btn-submit:hover:not(:disabled){
+transform:translateY(-2px);
+box-shadow:0 16px 28px rgba(239,68,68,.25);
+}
+
+.btn-submit:disabled{
+opacity:.55;
+cursor:not-allowed;
+}
+
+.btn-reset{
+background:#fff;
+color:var(--primary);
+border:2px solid var(--primary);
+}
+
+/* ERROR */
+.error-message{
+display:none;
+padding:14px;
+border-radius:14px;
+background:#fef2f2;
+color:#991b1b;
+margin-bottom:14px;
+}
+
+.error-message.active{
+display:block;
+}
+
+/* LOADING */
+.loading-overlay{
+display:none;
+position:fixed;
+inset:0;
+background:rgba(0,0,0,.55);
+z-index:3000;
+justify-content:center;
+align-items:center;
+}
+
+.loading-overlay.active{
+display:flex;
+}
+
+.loading-content{
+background:#fff;
+padding:30px;
+border-radius:24px;
+text-align:center;
+min-width:280px;
+}
+
+.spinner{
+width:54px;
+height:54px;
+border:4px solid #f3f4f6;
+border-top:4px solid var(--primary);
+border-radius:50%;
+margin:0 auto 14px;
+animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+to{transform:rotate(360deg);}
+}
+
+/* MOBILE */
+@media(max-width:1050px){
+.prediction-form{
+grid-template-columns:1fr;
+}
+.right-panel{
+position:static;
+}
+}
+
+@media(max-width:700px){
+.prediction-header h1{font-size:34px;}
+.symptoms-grid{grid-template-columns:1fr;}
+.nav-container{flex-direction:column;}
+}
+</style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="{{ url_for('dashboard') }}" class="logo">
-                <img src="/static/images/dev2.png" alt="TruMed Logo">
-            </a>
-            <div class="nav-links">
-                <a href="{{ url_for('dashboard') }}">Dashboard</a>
-                <a href="{{ url_for('prediction') }}" class="active">New Prediction</a>
-                <a href="{{ url_for('history') }}">History</a>
-                <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
-            </div>
-        </div>
-    </nav>
 
-    <div class="container">
-        <div class="prediction-header">
-            <h1>🩺 Health Assessment</h1>
-            <p>Select your symptoms for AI-powered disease prediction with explainable results</p>
-        </div>
+<nav class="navbar">
+<div class="nav-container">
+<a href="{{ url_for('dashboard') }}" class="logo">
+<img src="{{ url_for('static', filename='images/dev2.png') }}">
+</a>
 
-        <form method="POST" class="prediction-form" id="predictionForm">
-            <!-- Selection Counter -->
-            <div class="selection-counter">
-                <div class="counter-info">
-                    <div class="counter-number" id="symptomCount">0</div>
-                    <div class="counter-text">Symptoms Selected<br><small>Minimum: 5 required</small></div>
-                </div>
-                <div class="counter-warning" id="counterWarning">
-                    ⚠️ Please select at least 5 symptoms
-                </div>
-            </div>
+<div class="nav-links">
+<a href="{{ url_for('dashboard') }}">Dashboard</a>
+<a href="{{ url_for('prediction') }}" class="active">Prediction</a>
+<a href="{{ url_for('history') }}">History</a>
+<a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+</div>
+</div>
+</nav>
 
-            <!-- Error Message -->
-            <div class="error-message" id="errorMessage"></div>
+<div class="container">
 
-            <!-- Selected Symptoms Summary -->
-            <div class="selected-summary" id="selectedSummary">
-                <h3>✓ Selected Symptoms</h3>
-                <div class="selected-tags" id="selectedTags"></div>
-            </div>
+<div class="prediction-header">
+<h1>🩺 Health Assessment</h1>
+<p>Select symptoms and get AI-powered disease prediction.</p>
+</div>
 
-            <!-- Search and Filter -->
-            <div class="filter-section">
-                <input type="text" class="search-box" id="searchBox" 
-                       placeholder="🔍 Search symptoms...">
-                
-                <div class="category-filters" id="categoryFilters">
-                    <button type="button" class="filter-btn all active" data-category="all">
-                        All Symptoms
-                    </button>
-                </div>
-            </div>
+<form method="POST" id="predictionForm" class="prediction-form">
 
-            <!-- Category Accordion -->
-            <div class="category-accordion" id="categoryAccordion"></div>
+<!-- LEFT -->
+<div class="left-panel">
 
-            <!-- Additional Information -->
-            <div class="custom-issue-section">
-                <h2>Additional Information (Optional)</h2>
-                <textarea name="custom_issue" id="customIssue" rows="4" 
-                          placeholder="Describe any other symptoms or concerns..."></textarea>
-            </div>
+<div class="error-message" id="errorMessage"></div>
 
-            <!-- Form Actions -->
-            <div class="form-actions">
-                <button type="submit" class="btn-submit" id="submitBtn" disabled>
-                    Get AI Prediction
-                </button>
-                <button type="button" class="btn-reset" id="resetBtn">
-                    Clear All
-                </button>
-            </div>
-        </form>
-    </div>
+<div class="filter-section">
+<input type="text" class="search-box" id="searchBox" placeholder="🔍 Search symptoms...">
 
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-content">
-            <div class="spinner"></div>
-            <h3>Analyzing Symptoms...</h3>
-            <p>Please wait while our AI processes your data</p>
-        </div>
-    </div>
+<div class="category-filters" id="categoryFilters">
+<button type="button" class="filter-btn all active">All</button>
+</div>
+</div>
 
-    <script>
-        // Category icons
-        const categoryIcons = {
-            'Skin & Dermatological': '🧴',
-            'Respiratory System': '🫁',
-            'Digestive & Gastrointestinal': '🍽️',
-            'Cardiovascular & Circulatory': '❤️',
-            'Neurological & Mental Health': '🧠',
-            'Musculoskeletal System': '🦴',
-            'Urinary System': '💧',
-            'Systemic & General': '🌡️',
-            'Eyes & Vision': '👁️',
-            'Endocrine & Metabolic': '⚡',
-            'Liver & Hepatic': '🏥',
-            'Reproductive & Sexual': '👥',
-            'Blood & Immune System': '🩸',
-            'Other Medical History': '📝'
-        };
+<div class="category-accordion" id="categoryAccordion"></div>
 
-        let selectedSymptoms = new Set();
-        let allCategories = {};
-        const MIN_SYMPTOMS = 5;
+<div class="custom-issue-section">
+<h2>Additional Information</h2>
+<textarea name="custom_issue" id="customIssue" placeholder="Describe any other symptoms..."></textarea>
+</div>
 
-        // Load categories from API
-        async function loadCategories() {
-            try {
-                const response = await fetch('/api/symptom-categories');
-                const data = await response.json();
-                
-                if (data.success) {
-                    allCategories = data.categories;
-                    renderCategoryFilters();
-                    renderCategoryAccordion();
-                    
-                    // Check for pre-selected category from URL
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const selectedCategory = urlParams.get('category');
-                    if (selectedCategory && allCategories[selectedCategory]) {
-                        filterByCategory(selectedCategory);
-                    }
-                }
-            } catch (error) {
-                console.error('Error loading categories:', error);
-                showError('Failed to load symptom categories. Please refresh the page.');
-            }
-        }
+</div>
 
-        // Render category filter buttons
-        function renderCategoryFilters() {
-            const container = document.getElementById('categoryFilters');
-            const allBtn = container.querySelector('.filter-btn.all');
-            
-            Object.keys(allCategories).forEach(categoryName => {
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'filter-btn';
-                btn.dataset.category = categoryName;
-                btn.textContent = `${categoryIcons[categoryName] || '🏥'} ${categoryName}`;
-                btn.onclick = () => filterByCategory(categoryName);
-                container.appendChild(btn);
-            });
-        }
+<!-- RIGHT -->
+<div class="right-panel">
 
-        // Render category accordion
-        function renderCategoryAccordion() {
-            const container = document.getElementById('categoryAccordion');
-            container.innerHTML = '';
-            
-            Object.keys(allCategories).forEach(categoryName => {
-                const symptoms = allCategories[categoryName];
-                const section = createCategorySection(categoryName, symptoms);
-                container.appendChild(section);
-            });
-        }
+<div class="live-box">
+<div class="big-count" id="symptomCount">0</div>
+<div class="mini">Symptoms Selected</div>
+<div class="mini">Minimum 5 required</div>
+<div class="ready-meter">
+<div class="ready-fill" id="readyFill"></div>
+</div>
+</div>
 
-        // Create category section
-        function createCategorySection(categoryName, symptoms) {
-            const section = document.createElement('div');
-            section.className = 'category-section';
-            section.dataset.category = categoryName;
-            
-            const selectedCount = symptoms.filter(s => 
-                selectedSymptoms.has(s.value)
-            ).length;
-            
-            section.innerHTML = `
-                <div class="category-header">
-                    <div class="category-title">
-                        <span class="category-icon">${categoryIcons[categoryName] || '🏥'}</span>
-                        <span>${categoryName}</span>
-                    </div>
-                    <div class="category-info">
-                        <span class="category-count">${symptoms.length} symptoms</span>
-                        ${selectedCount > 0 ? `<span class="category-selected">${selectedCount} selected</span>` : ''}
-                        <span class="toggle-icon">▼</span>
-                    </div>
-                </div>
-                <div class="category-content">
-                    <div class="symptoms-grid" data-category="${categoryName}"></div>
-                </div>
-            `;
-            
-            // Add click event to header
-            const header = section.querySelector('.category-header');
-            header.onclick = () => toggleCategory(section);
-            
-            // Render symptoms
-            const grid = section.querySelector('.symptoms-grid');
-            symptoms.forEach(symptom => {
-                const label = createSymptomCheckbox(symptom);
-                grid.appendChild(label);
-            });
-            
-            return section;
-        }
+<div class="selected-summary" id="selectedSummary">
+<h3>Selected Symptoms</h3>
+<div class="selected-tags" id="selectedTags"></div>
+</div>
 
-        // Create symptom checkbox
-        function createSymptomCheckbox(symptom) {
-            const label = document.createElement('label');
-            label.className = 'symptom-checkbox';
-            label.dataset.symptom = symptom.value;
-            
-            if (selectedSymptoms.has(symptom.value)) {
-                label.classList.add('selected');
-            }
-            
-            label.innerHTML = `
-                <input type="checkbox" name="${symptom.value}" value="${symptom.value}"
-                       ${selectedSymptoms.has(symptom.value) ? 'checked' : ''}>
-                <span>${symptom.label}</span>
-            `;
-            
-            const checkbox = label.querySelector('input');
-            checkbox.onchange = (e) => handleSymptomChange(symptom.value, e.target.checked);
-            
-            return label;
-        }
+<div class="form-actions">
+<button type="submit" class="btn-submit" id="submitBtn" disabled>Choose 5 Symptoms</button>
+<button type="button" class="btn-reset" id="resetBtn">Clear All</button>
+</div>
 
-        // Toggle category expansion
-        function toggleCategory(section) {
-            section.classList.toggle('expanded');
-        }
+</div>
 
-        // Filter by category
-        function filterByCategory(categoryName) {
-            // Update filter buttons
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            if (categoryName === 'all') {
-                document.querySelector('.filter-btn.all').classList.add('active');
-                document.querySelectorAll('.category-section').forEach(section => {
-                    section.style.display = 'block';
-                });
-            } else {
-                document.querySelector(`[data-category="${categoryName}"]`).classList.add('active');
-                document.querySelectorAll('.category-section').forEach(section => {
-                    if (section.dataset.category === categoryName) {
-                        section.style.display = 'block';
-                        section.classList.add('expanded');
-                    } else {
-                        section.style.display = 'none';
-                    }
-                });
-            }
-        }
+</form>
+</div>
 
-        // Handle symptom selection
-        function handleSymptomChange(symptom, checked) {
-            if (checked) {
-                selectedSymptoms.add(symptom);
-            } else {
-                selectedSymptoms.delete(symptom);
-            }
-            
-            updateUI();
-        }
+<div class="loading-overlay" id="loadingOverlay">
+<div class="loading-content">
+<div class="spinner"></div>
+<h3>Analyzing Symptoms...</h3>
+<p>Please wait while AI processes your data.</p>
+</div>
+</div>
 
-        // Update UI after selection change
-        function updateUI() {
-            const count = selectedSymptoms.size;
-            
-            // Update counter
-            document.getElementById('symptomCount').textContent = count;
-            
-            // Update warning
-            const warning = document.getElementById('counterWarning');
-            if (count >= MIN_SYMPTOMS) {
-                warning.innerHTML = '✓ Ready for prediction';
-                warning.style.background = 'rgba(76, 175, 80, 0.3)';
-            } else {
-                warning.innerHTML = `⚠️ Select ${MIN_SYMPTOMS - count} more symptom${MIN_SYMPTOMS - count > 1 ? 's' : ''}`;
-                warning.style.background = 'rgba(255,255,255,0.2)';
-            }
-            
-            // Update submit button
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.disabled = count < MIN_SYMPTOMS;
-            submitBtn.textContent = count >= MIN_SYMPTOMS ? 
-                'Get AI Prediction' : 
-                `Select ${MIN_SYMPTOMS - count} More Symptom${MIN_SYMPTOMS - count > 1 ? 's' : ''}`;
-            
-            // Update selected summary
-            updateSelectedSummary();
-            
-            // Update category counts
-            updateCategoryCounts();
-            
-            // Update checkbox styles
-            document.querySelectorAll('.symptom-checkbox').forEach(label => {
-                const symptom = label.dataset.symptom;
-                if (selectedSymptoms.has(symptom)) {
-                    label.classList.add('selected');
-                } else {
-                    label.classList.remove('selected');
-                }
-            });
-        }
+<script>
+const categoryIcons={
+'Skin & Dermatological':'🧴',
+'Respiratory System':'🫁',
+'Digestive & Gastrointestinal':'🍽️',
+'Cardiovascular & Circulatory':'❤️',
+'Neurological & Mental Health':'🧠',
+'Musculoskeletal System':'🦴',
+'Urinary System':'💧',
+'Systemic & General':'🌡️',
+'Eyes & Vision':'👁️',
+'Endocrine & Metabolic':'⚡',
+'Liver & Hepatic':'🏥',
+'Reproductive & Sexual':'👥',
+'Blood & Immune System':'🩸',
+'Other Medical History':'📝'
+};
 
-        // Update selected symptoms summary
-        function updateSelectedSummary() {
-            const summary = document.getElementById('selectedSummary');
-            const tagsContainer = document.getElementById('selectedTags');
-            
-            if (selectedSymptoms.size > 0) {
-                summary.classList.add('active');
-                tagsContainer.innerHTML = '';
-                
-                selectedSymptoms.forEach(symptom => {
-                    const tag = document.createElement('div');
-                    tag.className = 'symptom-tag';
-                    tag.innerHTML = `
-                        <span>${symptom.replace(/_/g, ' ')}</span>
-                        <span class="remove-tag" onclick="removeSymptom('${symptom}')">✕</span>
-                    `;
-                    tagsContainer.appendChild(tag);
-                });
-            } else {
-                summary.classList.remove('active');
-            }
-        }
+let selectedSymptoms=new Set();
+let allCategories={};
+const MIN_SYMPTOMS=5;
 
-        // Remove symptom
-        function removeSymptom(symptom) {
-            selectedSymptoms.delete(symptom);
-            const checkbox = document.querySelector(`input[value="${symptom}"]`);
-            if (checkbox) checkbox.checked = false;
-            updateUI();
-        }
+async function loadCategories(){
+const res=await fetch('/api/symptom-categories');
+const data=await res.json();
+if(data.success){
+allCategories=data.categories;
+renderFilters();
+renderAccordion();
+}
+}
 
-        // Update category counts
-        function updateCategoryCounts() {
-            Object.keys(allCategories).forEach(categoryName => {
-                const section = document.querySelector(`.category-section[data-category="${categoryName}"]`);
-                if (section) {
-                    const symptoms = allCategories[categoryName];
-                    const selectedCount = symptoms.filter(s => 
-                        selectedSymptoms.has(s.value)
-                    ).length;
-                    
-                    const info = section.querySelector('.category-info');
-                    const existingSelected = info.querySelector('.category-selected');
-                    
-                    if (selectedCount > 0) {
-                        if (existingSelected) {
-                            existingSelected.textContent = `${selectedCount} selected`;
-                        } else {
-                            const span = document.createElement('span');
-                            span.className = 'category-selected';
-                            span.textContent = `${selectedCount} selected`;
-                            info.insertBefore(span, info.querySelector('.toggle-icon'));
-                        }
-                    } else if (existingSelected) {
-                        existingSelected.remove();
-                    }
-                }
-            });
-        }
+function renderFilters(){
+const wrap=document.getElementById('categoryFilters');
+Object.keys(allCategories).forEach(name=>{
+const b=document.createElement('button');
+b.type='button';
+b.className='filter-btn';
+b.textContent=(categoryIcons[name]||'🏥')+' '+name;
+b.onclick=()=>filterCategory(name,b);
+wrap.appendChild(b);
+});
+}
 
-        // Search symptoms
-        document.getElementById('searchBox').addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase();
-            
-            if (query.length === 0) {
-                document.querySelectorAll('.symptom-checkbox').forEach(label => {
-                    label.style.display = 'flex';
-                });
-                return;
-            }
-            
-            document.querySelectorAll('.symptom-checkbox').forEach(label => {
-                const text = label.textContent.toLowerCase();
-                label.style.display = text.includes(query) ? 'flex' : 'none';
-            });
-        });
+function filterCategory(name,btn){
+document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
+btn.classList.add('active');
 
-        // Reset form
-        document.getElementById('resetBtn').addEventListener('click', () => {
-            if (confirm('Are you sure you want to clear all selections?')) {
-                selectedSymptoms.clear();
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-                document.getElementById('customIssue').value = '';
-                document.getElementById('searchBox').value = '';
-                updateUI();
-                filterByCategory('all');
-            }
-        });
+document.querySelectorAll('.category-section').forEach(sec=>{
+sec.style.display=sec.dataset.category===name?'block':'none';
+sec.classList.add('expanded');
+});
+}
 
-        // Form submission
-        document.getElementById('predictionForm').addEventListener('submit', (e) => {
-            if (selectedSymptoms.size < MIN_SYMPTOMS) {
-                e.preventDefault();
-                showError(`Please select at least ${MIN_SYMPTOMS} symptoms before submitting.`);
-                return false;
-            }
-            
-            document.getElementById('loadingOverlay').classList.add('active');
-        });
+function renderAccordion(){
+const root=document.getElementById('categoryAccordion');
+root.innerHTML='';
+Object.keys(allCategories).forEach(name=>{
+const symptoms=allCategories[name];
 
-        // Show error message
-        function showError(message) {
-            const errorDiv = document.getElementById('errorMessage');
-            errorDiv.textContent = message;
-            errorDiv.classList.add('active');
-            setTimeout(() => {
-                errorDiv.classList.remove('active');
-            }, 5000);
-        }
+const box=document.createElement('div');
+box.className='category-section';
+box.dataset.category=name;
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCategories();
-        });
-    </script>
+box.innerHTML=`
+<div class="category-header">
+<div class="category-title">
+<span>${categoryIcons[name]||'🏥'}</span>
+<span>${name}</span>
+</div>
+<div class="category-info">
+<span class="category-count">${symptoms.length}</span>
+<span class="toggle-icon">▼</span>
+</div>
+</div>
+<div class="category-content">
+<div class="symptoms-grid"></div>
+</div>`;
+
+box.querySelector('.category-header').onclick=()=>box.classList.toggle('expanded');
+
+const grid=box.querySelector('.symptoms-grid');
+
+symptoms.forEach(sym=>{
+const label=document.createElement('label');
+label.className='symptom-checkbox';
+label.dataset.symptom=sym.value;
+label.innerHTML=`
+<input type="checkbox" value="${sym.value}" name="${sym.value}">
+<span>${sym.label}</span>`;
+label.querySelector('input').onchange=(e)=>toggleSymptom(sym.value,e.target.checked);
+grid.appendChild(label);
+});
+
+root.appendChild(box);
+});
+}
+
+function toggleSymptom(sym,val){
+val?selectedSymptoms.add(sym):selectedSymptoms.delete(sym);
+updateUI();
+}
+
+function updateUI(){
+const count=selectedSymptoms.size;
+document.getElementById('symptomCount').textContent=count;
+document.getElementById('readyFill').style.width=Math.min((count/5)*100,100)+'%';
+
+const btn=document.getElementById('submitBtn');
+btn.disabled=count<5;
+btn.textContent=count>=5?'Get AI Prediction':'Choose '+(5-count)+' More';
+
+document.querySelectorAll('.symptom-checkbox').forEach(el=>{
+const s=el.dataset.symptom;
+el.classList.toggle('selected',selectedSymptoms.has(s));
+});
+
+const tags=document.getElementById('selectedTags');
+tags.innerHTML='';
+selectedSymptoms.forEach(sym=>{
+const t=document.createElement('div');
+t.className='symptom-tag';
+t.innerHTML=`<span>${sym.replace(/_/g,' ')}</span><span class="remove-tag">✕</span>`;
+t.querySelector('.remove-tag').onclick=()=>{
+selectedSymptoms.delete(sym);
+document.querySelector('input[value="'+sym+'"]').checked=false;
+updateUI();
+};
+tags.appendChild(t);
+});
+}
+
+document.getElementById('searchBox').addEventListener('input',e=>{
+const q=e.target.value.toLowerCase();
+document.querySelectorAll('.symptom-checkbox').forEach(el=>{
+el.style.display=el.textContent.toLowerCase().includes(q)?'flex':'none';
+});
+});
+
+document.getElementById('resetBtn').onclick=()=>{
+selectedSymptoms.clear();
+document.querySelectorAll('input[type="checkbox"]').forEach(cb=>cb.checked=false);
+document.getElementById('customIssue').value='';
+updateUI();
+};
+
+document.getElementById('predictionForm').addEventListener('submit',e=>{
+if(selectedSymptoms.size<5){
+e.preventDefault();
+const err=document.getElementById('errorMessage');
+err.textContent='Please select at least 5 symptoms.';
+err.classList.add('active');
+return;
+}
+document.getElementById('loadingOverlay').classList.add('active');
+});
+
+loadCategories();
+</script>
+
 </body>
 </html>

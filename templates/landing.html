@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>TruMed - AI Healthcare</title>
+
 <link rel="icon" href="{{ url_for('static', filename='images/dev2.png') }}">
 
 <style>
+
 *{
     margin:0;
     padding:0;
@@ -112,6 +114,7 @@ body{
     text-decoration:none;
     font-size:18px;
     font-weight:700;
+    transition:.3s;
 }
 
 .primary{
@@ -129,24 +132,45 @@ body{
     transform:translateY(-3px);
 }
 
-.trust{
+/* TRUST BADGE */
+.trust-badge{
     display:flex;
     align-items:center;
-    gap:18px;
-    margin-top:15px;
+    gap:16px;
+    margin-top:28px;
 }
 
-.trust img{
-    width:120px;
+.avatars{
+    display:flex;
+    align-items:center;
 }
 
-.trust p{
+.avatars img{
+    width:44px;
+    height:44px;
+    border-radius:50%;
+    object-fit:cover;
+    border:3px solid #fff;
+    margin-left:-12px;
+    box-shadow:0 6px 14px rgba(0,0,0,.12);
+    transition:.3s;
+}
+
+.avatars img:first-child{
+    margin-left:0;
+}
+
+.avatars img:hover{
+    transform:translateY(-4px) scale(1.05);
+}
+
+.trust-text{
     font-size:16px;
-    color:#666;
-    margin:0;
+    color:#555;
+    font-weight:500;
 }
 
-.trust span{
+.trust-text span{
     color:#ef4444;
     font-weight:800;
 }
@@ -176,13 +200,13 @@ body{
     object-fit:contain;
 }
 
-/* RESPONSIVE */
+/* MOBILE */
 @media(max-width:1100px){
 
 .hero{
     grid-template-columns:1fr;
-    padding:40px 0;
     text-align:center;
+    padding:40px 0;
 }
 
 .left p{
@@ -191,7 +215,7 @@ body{
 }
 
 .hero-btns,
-.trust{
+.trust-badge{
     justify-content:center;
 }
 
@@ -241,12 +265,14 @@ body{
 }
 
 }
+
 </style>
 </head>
 <body>
 
 <!-- NAVBAR -->
 <nav class="navbar">
+
     <a href="/" class="logo">
         <img src="{{ url_for('static', filename='images/dev2.png') }}">
     </a>
@@ -255,12 +281,15 @@ body{
         <a href="{{ url_for('login') }}" class="btn-outline">Login</a>
         <a href="{{ url_for('signup') }}" class="btn-fill">Sign Up</a>
     </div>
+
 </nav>
 
 <!-- HERO -->
 <section class="hero">
 
+    <!-- LEFT -->
     <div class="left">
+
         <h1>
             AI-Powered <br>
             <span>Disease Risk</span><br>
@@ -268,26 +297,39 @@ body{
         </h1>
 
         <p>
-            Get instant, explainable health insights using advanced
-            artificial intelligence. Understand your health better with
-            our state-of-the-art ML models.
+            Get instant, explainable health insights using advanced artificial intelligence.
+            Understand your health better with our state-of-the-art ML models.
         </p>
 
         <div class="hero-btns">
             <a href="{{ url_for('signup') }}" class="hero-btn primary">🚀 Get Started Free</a>
-            <a href="{{ url_for('login') }}" class="hero-btn secondary">▶ Learn More</a>
+            <a href="{{ url_for('login') }}" class="hero-btn secondary">Learn More</a>
         </div>
 
-        <div class="trust">
-            <img src="https://i.imgur.com/QM8Q7uG.png">
-            <p>Trusted by <span>10,000+</span> users</p>
+        <!-- TRUST BADGE -->
+        <div class="trust-badge">
+
+            <div class="avatars">
+                <img src="{{ url_for('static', filename='images/user1.jpg') }}">
+                <img src="{{ url_for('static', filename='images/user2.jpg') }}">
+                <img src="{{ url_for('static', filename='images/user3.jpg') }}">
+            </div>
+
+            <div class="trust-text">
+                Trusted by <span>100+</span> users worldwide
+            </div>
+
         </div>
+
     </div>
 
+    <!-- RIGHT -->
     <div class="right">
+
         <div class="image-box">
-          <img src="{{ url_for('static', filename='images/robot.png') }}">
+            <img src="{{ url_for('static', filename='images/robot.png') }}">
         </div>
+
     </div>
 
 </section>
