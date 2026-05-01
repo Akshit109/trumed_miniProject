@@ -72,16 +72,11 @@ SYMPTOMS_LIST = [
     'inflammatory_nails', 'blister', 'red_sore_around_nose', 'yellow_crust_ooze'
 ]
 
-# ====================================================================
-# TEXT TO SYMPTOM EXTRACTION
-# ====================================================================
 
 def extract_symptoms_from_text(text, severity_weights=None):
     """Extract symptoms from patient text description with severity weighting"""
     text_lower = text.lower()
     detected_symptoms = []
-    
-    # Comprehensive symptom keyword mappings
     symptom_keywords = {
         'itching': ['itch', 'itchy', 'scratching'],
         'skin_rash': ['rash', 'skin rash', 'red patches'],
@@ -215,7 +210,6 @@ def extract_symptoms_from_text(text, severity_weights=None):
         'swollen_blood_vessels': ['swollen vessels'],
     }
     
-    # Check each symptom
     for symptom, keywords in symptom_keywords.items():
         for keyword in keywords:
             if keyword in text_lower:
@@ -251,10 +245,7 @@ def preprocess_text_to_binary(df, severity_weights):
     print(f"✓ Average symptoms per record: {avg_symptoms:.2f}")
     
     return symptom_matrix
-
-# ====================================================================
-# MAIN TRAINING FUNCTION
-# ====================================================================
+==================================================
 
 def train_model_with_both_files(
     disease_csv='Symptom2Disease.csv',
@@ -389,13 +380,7 @@ def train_model_with_both_files(
     print("1. Run your Flask app: python app.py")
     print("2. Navigate to http://localhost:5000")
     print("3. Test predictions with symptom selection")
-    
     return model, scaler, le_target, test_accuracy
-
-# ====================================================================
-# MAIN EXECUTION
-# ====================================================================
-
 if __name__ == "__main__":
     print("\nStarting model training with both CSV files...\n")
     
